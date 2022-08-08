@@ -1,4 +1,5 @@
 import { InvalidEmailError, InvalidNameError } from '@/entities/errors'
+import { UseCase } from '@/usecases/ports'
 import { RegisterUserOnMailingList } from '@/usecases/register-user-on-mailing-list'
 import { HttpRequest, HttpResponse } from '@/web-controllers/ports'
 import { RegisterUserController } from '@/web-controllers/register-user-controller'
@@ -8,8 +9,15 @@ import { MissingParamError } from './errors/missing-param-error'
 describe('Register user web controller', () => {
   const users = []
   const repo = new InMemoryUserRepository(users)
-  const usecase = new RegisterUserOnMailingList(repo)
+  const usecase: UseCase = new RegisterUserOnMailingList(repo)
   const controller = new RegisterUserController(usecase)
+  class ErrorThrowingUseCaseStub implements UseCase {
+    perform (request: any): Promise<void> {
+      throw Error()
+    }
+  }
+
+  const errorThrowingUseCaseStub: UseCase = new ErrorThrowingUseCaseStub()
 
   test('should return status code 201 when request contains valid user data', async () => {
     const request: HttpRequest = {
@@ -93,17 +101,18 @@ describe('Register user web controller', () => {
     expect((response.body as Error).message).toEqual('Missing parameter from request: name email.')
   })
 
-  // test('should return status code 500 when server raises', async () => {
-  //   const request: HttpRequest = {
-  //     body: {
-  //       name: 'Any name',
-  //       email: 'any@email.com'
-  //     }
-  //   }
+  test('should return status code 500 when server raises', async () => {
+    const request: HttpRequest = {
+      body: {
+        name: 'Any name',
+        email: 'any@email.com'
+      }
+    }
 
-  //   const response: HttpResponse = await controller.handle(request)
+    const controller = new RegisterUserController(errorThrowingUseCaseStub)
+    const response: HttpResponse = await controller.handle(request)
 
-  //   expect(response.statusCode).toBe(500)
-  //   expect(response.body).toBeInstanceOf(Error)
-  // })
+    expect(response.statusCode).toBe(500)
+    expect(response.body).toBeInstanceOf(Error)
+  })
 })
