@@ -1,7 +1,7 @@
 import { UserData } from '@/entities'
 import { RegisterUserOnMailingList } from '@/usecases/register-user-on-mailing-list'
 import { HttpRequest, HttpResponse } from '@/web-controllers/ports'
-import { badRequest, created } from '@/web-controllers/util'
+import { badRequest, created, serverError } from '@/web-controllers/util'
 import { MissingParamError } from '@test/web-controllers/errors/missing-param-error'
 
 export class RegisterUserController {
@@ -12,21 +12,25 @@ export class RegisterUserController {
   }
 
   async handle (request: HttpRequest): Promise<HttpResponse> {
-    if (!(request.body.name) || !(request.body.email)) {
-      let missingParameter = !(request.body.name) ? 'name ' : ''
-      missingParameter += !(request.body.email) ? 'email' : ''
-      return badRequest(new MissingParamError(missingParameter.trim()))
-    }
+    try {
+      if (!(request.body.name) || !(request.body.email)) {
+        let missingParameter = !(request.body.name) ? 'name ' : ''
+        missingParameter += !(request.body.email) ? 'email' : ''
+        return badRequest(new MissingParamError(missingParameter.trim()))
+      }
 
-    const userData: UserData = request.body
-    const response = await this.usecase.registerUserOnMailingList(userData)
+      const userData: UserData = request.body
+      const response = await this.usecase.perform(userData)
 
-    if (response.isLeft()) {
-      return badRequest(response.value)
-    }
+      if (response.isLeft()) {
+        return badRequest(response.value)
+      }
 
-    if (response.isRight()) {
-      return created(response.value)
+      if (response.isRight()) {
+        return created(response.value)
+      }
+    } catch (error) {
+      return serverError(error)
     }
   }
 }

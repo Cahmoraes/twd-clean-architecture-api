@@ -1,5 +1,5 @@
 import { UserData } from '@/entities'
-import { UserRepository } from '@/usecases/ports'
+import { UserRepository } from '@/usecases/register-user-on-mailing-list/ports'
 import { RegisterUserOnMailingList } from '@/usecases/register-user-on-mailing-list/'
 import { InMemoryUserRepository } from '@test/usecases/register-user-on-mailing-list/repository'
 
@@ -10,7 +10,7 @@ describe('Register user on mailing list use case', () => {
     const useCase: RegisterUserOnMailingList = new RegisterUserOnMailingList(repo)
     const name = 'any_name'
     const email = 'any@email.com'
-    const response = await useCase.registerUserOnMailingList({ name, email })
+    const response = await useCase.perform({ name, email })
     const user = await repo.findUserByEmail('any@email.com')
 
     expect(user.name).toBe('any_name')
@@ -23,7 +23,7 @@ describe('Register user on mailing list use case', () => {
     const useCase: RegisterUserOnMailingList = new RegisterUserOnMailingList(repo)
     const name = 'any_name'
     const invalidEmail = 'invalid_email'
-    const response = (await useCase.registerUserOnMailingList({ name, email: invalidEmail })).value as Error
+    const response = (await useCase.perform({ name, email: invalidEmail })).value as Error
     const user = await repo.findUserByEmail('any@email.com')
 
     expect(user).toBeNull()
@@ -37,7 +37,7 @@ describe('Register user on mailing list use case', () => {
     const useCase: RegisterUserOnMailingList = new RegisterUserOnMailingList(repo)
     const invalidName = ''
     const validEmail = 'any@mail.com'
-    const response = (await useCase.registerUserOnMailingList({ name: invalidName, email: validEmail })).value
+    const response = (await useCase.perform({ name: invalidName, email: validEmail })).value
     const user = await repo.findUserByEmail('any@email.com')
 
     expect(user).toBeNull()
