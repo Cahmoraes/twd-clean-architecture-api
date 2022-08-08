@@ -9,8 +9,8 @@ import { MissingParamError } from './errors/missing-param-error'
 describe('Register user web controller', () => {
   const users = []
   const repo = new InMemoryUserRepository(users)
-  const usecase: UseCase = new RegisterUserOnMailingList(repo)
-  const controller = new RegisterUserController(usecase)
+  const useCase: UseCase = new RegisterUserOnMailingList(repo)
+  const controller = new RegisterUserController(useCase)
   class ErrorThrowingUseCaseStub implements UseCase {
     perform (request: any): Promise<void> {
       throw Error()
@@ -62,13 +62,13 @@ describe('Register user web controller', () => {
   })
 
   test('should return status code 400 when request is missing user name', async () => {
-    const requestWithInvalidEmail: HttpRequest = {
+    const requestWithMissingName: HttpRequest = {
       body: {
         email: 'invalid_mail.com'
       }
     }
 
-    const response: HttpResponse = await controller.handle(requestWithInvalidEmail)
+    const response: HttpResponse = await controller.handle(requestWithMissingName)
 
     expect(response.statusCode).toBe(400)
     expect(response.body).toBeInstanceOf(MissingParamError)
@@ -76,13 +76,13 @@ describe('Register user web controller', () => {
   })
 
   test('should return status code 400 when request is invalid user email', async () => {
-    const requestWithInvalidEmail: HttpRequest = {
+    const requestWithMissingEmail: HttpRequest = {
       body: {
         name: 'Any Name'
       }
     }
 
-    const response: HttpResponse = await controller.handle(requestWithInvalidEmail)
+    const response: HttpResponse = await controller.handle(requestWithMissingEmail)
 
     expect(response.statusCode).toBe(400)
     expect(response.body).toBeInstanceOf(MissingParamError)
@@ -90,11 +90,11 @@ describe('Register user web controller', () => {
   })
 
   test('should return status code 400 when request is missing user email', async () => {
-    const requestWithInvalidEmail: HttpRequest = {
+    const requestWithMissingNameAndEmail: HttpRequest = {
       body: {}
     }
 
-    const response: HttpResponse = await controller.handle(requestWithInvalidEmail)
+    const response: HttpResponse = await controller.handle(requestWithMissingNameAndEmail)
 
     expect(response.statusCode).toBe(400)
     expect(response.body).toBeInstanceOf(MissingParamError)
