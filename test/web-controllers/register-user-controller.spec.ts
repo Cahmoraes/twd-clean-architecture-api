@@ -1,9 +1,9 @@
 import { InvalidEmailError, InvalidNameError } from '@/entities/errors'
 import { UseCase } from '@/usecases/ports'
 import { RegisterUserOnMailingList } from '@/usecases/register-user-on-mailing-list'
+import { InMemoryUserRepository } from '@/usecases/register-user-on-mailing-list/repository'
 import { HttpRequest, HttpResponse } from '@/web-controllers/ports'
 import { RegisterUserController } from '@/web-controllers/register-user-controller'
-import { InMemoryUserRepository } from '@test/usecases/register-user-on-mailing-list/repository'
 import { MissingParamError } from './errors/missing-param-error'
 
 describe('Register user web controller', () => {
